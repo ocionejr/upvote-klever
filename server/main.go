@@ -3,12 +3,22 @@ package main
 import (
 	"log"
 
-	"github.com/ocionejr/upvote-klever/util"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
-func main(){
-	_, err := util.LoadConfig(".")
+func main() {
+	server := CreateServer()
+	grpcServer := grpc.NewServer()
+	server.RegisterServers(grpcServer)
+	reflection.Register(grpcServer)
+	listener := server.GetListener()
+
+	log.Printf("start gRPC server at %s", listener.Addr().String())
+	err := grpcServer.Serve(listener)
 	if err != nil {
-		log.Fatal("cannot load config:", err)
+		log.Fatal("cannot start gRPC server:", err)
 	}
 }
+
+
