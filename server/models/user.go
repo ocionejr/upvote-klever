@@ -8,15 +8,21 @@ import (
 
 type User struct {
 	ID primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
-	Username string `bson:"username" json:"username" validate:"regexp=^(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$,min=5"`
-	Password string `bson:"password" json:"password" validate:"regexp=^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])$,min=5"`
+	Username string `bson:"username" json:"username" validate:"regexp=^[A-Za-z][A-Za-z0-9_.-@#]+$,min=5"`
+	Password string `bson:"password" json:"password" validate:"regexp=^[A-Za-z][A-Za-z0-9_.-@#]+$,min=5"`
 }
 
-func documentToUserRequest(data *User) *pb.UserRequest {
+func UserToUserRequest(data *User) *pb.UserRequest {
 	return &pb.UserRequest{
-		Id: data.ID.Hex(),
 		Username: data.Username,
 		Password: data.Password,
+	}
+}
+
+func UserRequestToUser(user *pb.UserRequest) *User{
+	return &User{
+		Username: user.Username,
+		Password: user.Password,
 	}
 }
 
