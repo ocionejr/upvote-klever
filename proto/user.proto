@@ -5,8 +5,9 @@ package user;
 option go_package = "github.com/ocionejr/upvote-klever/proto";
 
 message UserRequest {
-  string username = 1;
-  string password = 2;
+  string id = 1;
+  string username = 2;
+  string password = 3;
 }
 
 message UserId {
