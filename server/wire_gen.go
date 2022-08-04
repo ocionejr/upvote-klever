@@ -10,7 +10,6 @@ import (
 	"github.com/ocionejr/upvote-klever/server/common"
 	"github.com/ocionejr/upvote-klever/server/repositories"
 	"github.com/ocionejr/upvote-klever/server/servers"
-	"github.com/ocionejr/upvote-klever/server/services"
 )
 
 // Injectors from wire.go:
@@ -18,9 +17,8 @@ import (
 func CreateServer() *common.Server {
 	config := common.NewConfig()
 	database := common.ConnectToDatabase(config)
-	userRepository := repositories.NewUserRepository(database)
-	userService := services.NewUserService(userRepository)
-	userServer := server.NewUserServer(userService)
-	commonServer := common.NewServer(config, userServer)
-	return commonServer
+	tweetRepository := repositories.NewTweetRepository(database)
+	tweetServer := servers.NewTweetServer(tweetRepository)
+	server := common.NewServer(config, tweetServer)
+	return server
 }

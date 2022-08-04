@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package tweet;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/ocionejr/upvote-klever/proto";
+
+message TweetRequest{
+  string author_id = 1;
+  string message = 2;
+}
+
+message TweetResponse {
+  string id = 1;
+  string author_id = 2;
+  string message = 3;
+  repeated string upvotes = 4;
+  google.protobuf.Timestamp created_at = 5;
+  google.protobuf.Timestamp updated_at = 6;
+}
+
+service TweetService{
+  rpc CreateTweet(TweetRequest) returns (TweetResponse);
+}

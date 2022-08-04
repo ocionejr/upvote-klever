@@ -5,24 +5,25 @@ import (
 	"net"
 
 	pb "github.com/ocionejr/upvote-klever/pb"
+	"github.com/ocionejr/upvote-klever/server/servers"
 	server "github.com/ocionejr/upvote-klever/server/servers"
 	"google.golang.org/grpc"
 )
 
 type Server struct {
-	UserServer *server.UserServer
 	config *Config
+	tweetServer *servers.TweetServer
 }
 
-func NewServer(config *Config, userServer *server.UserServer) *Server{
+func NewServer(config *Config, tweetServer *server.TweetServer) *Server{
 	return &Server{
-		UserServer: userServer,
 		config: config,
+		tweetServer: tweetServer,
 	}
 }
 
 func (s *Server) RegisterServers(grpcServer *grpc.Server) {
-	pb.RegisterUserServiceServer(grpcServer, s.UserServer)
+	pb.RegisterTweetServiceServer(grpcServer, s.tweetServer)
 }
 
 func (s *Server) GetListener() net.Listener {
