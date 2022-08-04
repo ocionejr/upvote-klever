@@ -3,6 +3,7 @@ syntax = "proto3";
 package tweet;
 
 import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
 
 option go_package = "github.com/ocionejr/upvote-klever/proto";
 
@@ -27,4 +28,5 @@ message TweetId {
 service TweetService{
   rpc CreateTweet(TweetRequest) returns (TweetResponse);
   rpc FindTweetById(TweetId) returns (TweetResponse);
+  rpc ListTweets (google.protobuf.Empty) returns (stream TweetResponse);
 }

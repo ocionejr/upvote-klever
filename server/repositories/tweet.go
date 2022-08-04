@@ -63,3 +63,16 @@ func (r *TweetRepository) FindById(ctx context.Context, id string) (*models.Twee
 
 	return tweet, nil
 }
+
+func (r *TweetRepository) ListAll() (*mongo.Cursor, error) {
+	cur, err := r.tweets.Find(context.Background(), primitive.D{{}})
+
+	if err != nil {
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Unknown internal error: %v", err),
+		)
+	}
+
+	return cur, nil
+}

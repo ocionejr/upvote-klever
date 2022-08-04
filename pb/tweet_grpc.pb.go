@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -24,6 +25,7 @@ const _ = grpc.SupportPackageIsVersion7
 type TweetServiceClient interface {
 	CreateTweet(ctx context.Context, in *TweetRequest, opts ...grpc.CallOption) (*TweetResponse, error)
 	FindTweetById(ctx context.Context, in *TweetId, opts ...grpc.CallOption) (*TweetResponse, error)
+	ListTweets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (TweetService_ListTweetsClient, error)
 }
 
 type tweetServiceClient struct {
@@ -52,12 +54,45 @@ func (c *tweetServiceClient) FindTweetById(ctx context.Context, in *TweetId, opt
 	return out, nil
 }
 
+func (c *tweetServiceClient) ListTweets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (TweetService_ListTweetsClient, error) {
+	stream, err := c.cc.NewStream(ctx, &TweetService_ServiceDesc.Streams[0], "/tweet.TweetService/ListTweets", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &tweetServiceListTweetsClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type TweetService_ListTweetsClient interface {
+	Recv() (*TweetResponse, error)
+	grpc.ClientStream
+}
+
+type tweetServiceListTweetsClient struct {
+	grpc.ClientStream
+}
+
+func (x *tweetServiceListTweetsClient) Recv() (*TweetResponse, error) {
+	m := new(TweetResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // TweetServiceServer is the server API for TweetService service.
 // All implementations must embed UnimplementedTweetServiceServer
 // for forward compatibility
 type TweetServiceServer interface {
 	CreateTweet(context.Context, *TweetRequest) (*TweetResponse, error)
 	FindTweetById(context.Context, *TweetId) (*TweetResponse, error)
+	ListTweets(*emptypb.Empty, TweetService_ListTweetsServer) error
 	mustEmbedUnimplementedTweetServiceServer()
 }
 
@@ -70,6 +105,9 @@ func (UnimplementedTweetServiceServer) CreateTweet(context.Context, *TweetReques
 }
 func (UnimplementedTweetServiceServer) FindTweetById(context.Context, *TweetId) (*TweetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindTweetById not implemented")
+}
+func (UnimplementedTweetServiceServer) ListTweets(*emptypb.Empty, TweetService_ListTweetsServer) error {
+	return status.Errorf(codes.Unimplemented, "method ListTweets not implemented")
 }
 func (UnimplementedTweetServiceServer) mustEmbedUnimplementedTweetServiceServer() {}
 
@@ -120,6 +158,27 @@ func _TweetService_FindTweetById_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TweetService_ListTweets_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(emptypb.Empty)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(TweetServiceServer).ListTweets(m, &tweetServiceListTweetsServer{stream})
+}
+
+type TweetService_ListTweetsServer interface {
+	Send(*TweetResponse) error
+	grpc.ServerStream
+}
+
+type tweetServiceListTweetsServer struct {
+	grpc.ServerStream
+}
+
+func (x *tweetServiceListTweetsServer) Send(m *TweetResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // TweetService_ServiceDesc is the grpc.ServiceDesc for TweetService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -136,6 +195,12 @@ var TweetService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _TweetService_FindTweetById_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "ListTweets",
+			Handler:       _TweetService_ListTweets_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "tweet.proto",
 }
