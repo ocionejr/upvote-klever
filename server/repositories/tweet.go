@@ -109,3 +109,32 @@ func (r *TweetRepository) Update(ctx context.Context, tweet *models.Tweet, id st
 
 	return nil
 }
+
+func (r *TweetRepository) DeleteTweet(ctx context.Context, id string) error {
+	oid, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return status.Errorf(
+			codes.InvalidArgument,
+			"Cannot parse ID",
+		)
+	}
+
+	res, err := r.tweets.DeleteOne(ctx, bson.M{"_id": oid})
+
+	if err != nil {
+		return status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Cannot delete object in MongoDB: %v", err),
+		)
+	}
+
+	if res.DeletedCount == 0 {
+		return status.Errorf(
+			codes.NotFound,
+			"Tweet was not found",
+		)
+	}
+
+	return nil
+}

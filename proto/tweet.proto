@@ -35,4 +35,5 @@ service TweetService{
   rpc FindTweetById(TweetId) returns (TweetResponse);
   rpc ListTweets (google.protobuf.Empty) returns (stream TweetResponse);
   rpc UpdateTweet (UpdateTweetRequest) returns (google.protobuf.Empty);
+  rpc DeleteTweet (TweetId) returns (google.protobuf.Empty);
 }

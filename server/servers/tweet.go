@@ -90,3 +90,11 @@ func (s *TweetServer) UpdateTweet(ctx context.Context, in *pb.UpdateTweetRequest
 
 	return &emptypb.Empty{}, nil
 }
+
+func (s *TweetServer) DeleteTweet(ctx context.Context, in *pb.TweetId) (*emptypb.Empty, error) {
+	if err := s.tweetRepository.DeleteTweet(ctx, in.Id); err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
+}

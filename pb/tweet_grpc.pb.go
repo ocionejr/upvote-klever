@@ -27,6 +27,7 @@ type TweetServiceClient interface {
 	FindTweetById(ctx context.Context, in *TweetId, opts ...grpc.CallOption) (*TweetResponse, error)
 	ListTweets(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (TweetService_ListTweetsClient, error)
 	UpdateTweet(ctx context.Context, in *UpdateTweetRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	DeleteTweet(ctx context.Context, in *TweetId, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
 type tweetServiceClient struct {
@@ -96,6 +97,15 @@ func (c *tweetServiceClient) UpdateTweet(ctx context.Context, in *UpdateTweetReq
 	return out, nil
 }
 
+func (c *tweetServiceClient) DeleteTweet(ctx context.Context, in *TweetId, opts ...grpc.CallOption) (*emptypb.Empty, error) {
+	out := new(emptypb.Empty)
+	err := c.cc.Invoke(ctx, "/tweet.TweetService/DeleteTweet", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TweetServiceServer is the server API for TweetService service.
 // All implementations must embed UnimplementedTweetServiceServer
 // for forward compatibility
@@ -104,6 +114,7 @@ type TweetServiceServer interface {
 	FindTweetById(context.Context, *TweetId) (*TweetResponse, error)
 	ListTweets(*emptypb.Empty, TweetService_ListTweetsServer) error
 	UpdateTweet(context.Context, *UpdateTweetRequest) (*emptypb.Empty, error)
+	DeleteTweet(context.Context, *TweetId) (*emptypb.Empty, error)
 	mustEmbedUnimplementedTweetServiceServer()
 }
 
@@ -122,6 +133,9 @@ func (UnimplementedTweetServiceServer) ListTweets(*emptypb.Empty, TweetService_L
 }
 func (UnimplementedTweetServiceServer) UpdateTweet(context.Context, *UpdateTweetRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateTweet not implemented")
+}
+func (UnimplementedTweetServiceServer) DeleteTweet(context.Context, *TweetId) (*emptypb.Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTweet not implemented")
 }
 func (UnimplementedTweetServiceServer) mustEmbedUnimplementedTweetServiceServer() {}
 
@@ -211,6 +225,24 @@ func _TweetService_UpdateTweet_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TweetService_DeleteTweet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TweetId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TweetServiceServer).DeleteTweet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/tweet.TweetService/DeleteTweet",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TweetServiceServer).DeleteTweet(ctx, req.(*TweetId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TweetService_ServiceDesc is the grpc.ServiceDesc for TweetService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -229,6 +261,10 @@ var TweetService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateTweet",
 			Handler:    _TweetService_UpdateTweet_Handler,
+		},
+		{
+			MethodName: "DeleteTweet",
+			Handler:    _TweetService_DeleteTweet_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
