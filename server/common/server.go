@@ -11,13 +11,13 @@ import (
 )
 
 type Server struct {
-	config *Config
+	config      *Config
 	tweetServer *servers.TweetServer
 }
 
-func NewServer(config *Config, tweetServer *server.TweetServer) *Server{
+func NewServer(config *Config, tweetServer *server.TweetServer) *Server {
 	return &Server{
-		config: config,
+		config:      config,
 		tweetServer: tweetServer,
 	}
 }
@@ -32,4 +32,4 @@ func (s *Server) GetListener() net.Listener {
 		log.Fatal("Cannot create listener:", err)
 	}
 	return listener
-} 
+}

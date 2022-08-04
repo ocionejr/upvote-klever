@@ -10,7 +10,7 @@ type TweetServer struct {
 	tweetRepository *repositories.TweetRepository
 }
 
-func NewTweetServer(tweetRepository *repositories.TweetRepository) *TweetServer{
+func NewTweetServer(tweetRepository *repositories.TweetRepository) *TweetServer {
 	return &TweetServer{
 		tweetRepository: tweetRepository,
 	}

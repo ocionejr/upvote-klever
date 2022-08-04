@@ -20,5 +20,3 @@ func main() {
 		log.Fatal("cannot start gRPC server:", err)
 	}
 }
-
-
