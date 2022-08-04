@@ -76,3 +76,36 @@ func (r *TweetRepository) ListAll() (*mongo.Cursor, error) {
 
 	return cur, nil
 }
+
+func (r *TweetRepository) Update(ctx context.Context, tweet *models.Tweet, id string) error {
+	oid, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return status.Errorf(
+			codes.InvalidArgument,
+			"Cannot parse ID",
+		)
+	}
+
+	res, err := r.tweets.UpdateOne(
+		ctx,
+		bson.M{"_id": oid},
+		bson.M{"$set": tweet},
+	)
+
+	if err != nil {
+		return status.Errorf(
+			codes.Internal,
+			"Could not update",
+		)
+	}
+
+	if res.MatchedCount == 0 {
+		return status.Errorf(
+			codes.NotFound,
+			"Cannot found tweet with Id",
+		)
+	}
+
+	return nil
+}

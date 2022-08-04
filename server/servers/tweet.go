@@ -80,3 +80,13 @@ func (s *TweetServer) ListTweets(in *emptypb.Empty, stream pb.TweetService_ListT
 
 	return nil
 }
+
+func (s *TweetServer) UpdateTweet(ctx context.Context, in *pb.UpdateTweetRequest) (*emptypb.Empty, error) {
+	tweet := models.UpdateTweetRequestToTweet(in)
+
+	if err := s.tweetRepository.Update(ctx, tweet, in.Id); err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
+}

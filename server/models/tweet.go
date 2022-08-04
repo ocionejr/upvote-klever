@@ -10,11 +10,11 @@ import (
 )
 
 type Tweet struct {
-	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
-	AuthorId  string             `bson:"author_id" json:"author_id" validate:"nonzero"`
+	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
+	AuthorId  string             `bson:"author_id,omitempty" json:"author_id" validate:"nonzero"`
 	Message   string             `bson:"message" json:"message" validate:"max=280"`
-	Upvotes   []string           `bson:"upvotes,omitempty" json:"upvotes,omitempty"`
-	CreatedAt primitive.DateTime `bson:"created_at" json:"created_at"`
+	Upvotes   []string           `bson:"upvotes,omitempty" json:"upvotes"`
+	CreatedAt primitive.DateTime `bson:"created_at,omitempty" json:"created_at"`
 	UpdatedAt primitive.DateTime `bson:"updated_at" json:"updated_at"`
 }
 
@@ -35,6 +35,13 @@ func TweetToTweetResponse(tweet *Tweet) *pb.TweetResponse {
 		Upvotes:   tweet.Upvotes,
 		CreatedAt: timestamppb.New(tweet.CreatedAt.Time()),
 		UpdatedAt: timestamppb.New(tweet.UpdatedAt.Time()),
+	}
+}
+
+func UpdateTweetRequestToTweet(req *pb.UpdateTweetRequest) *Tweet {
+	return &Tweet{
+		Message:   req.Message,
+		UpdatedAt: primitive.NewDateTimeFromTime(time.Now()),
 	}
 }
 
