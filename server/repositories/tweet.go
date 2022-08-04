@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/ocionejr/upvote-klever/server/models"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"google.golang.org/grpc/codes"
@@ -38,4 +39,27 @@ func (r *TweetRepository) InsertTweet(ctx context.Context, tweet *models.Tweet) 
 
 	tweet.ID = oid
 	return nil
+}
+
+func (r *TweetRepository) FindById(ctx context.Context, id string) (*models.Tweet, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+
+	if err != nil {
+		return nil, status.Errorf(
+			codes.InvalidArgument,
+			"Cannot parse ID",
+		)
+	}
+
+	tweet := &models.Tweet{}
+	res := r.tweets.FindOne(ctx, bson.M{"_id": oid})
+
+	if err := res.Decode(tweet); err != nil {
+		return nil, status.Errorf(
+			codes.NotFound,
+			"Cannot find tweet with the provided ID",
+		)
+	}
+
+	return tweet, nil
 }

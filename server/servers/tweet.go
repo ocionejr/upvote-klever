@@ -38,3 +38,13 @@ func (s *TweetServer) CreateTweet(ctx context.Context, in *pb.TweetRequest) (*pb
 
 	return models.TweetToTweetResponse(tweet), nil
 }
+
+func (s *TweetServer) FindTweetById(ctx context.Context, in *pb.TweetId) (*pb.TweetResponse, error) {
+	tweet, err := s.tweetRepository.FindById(ctx, in.Id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return models.TweetToTweetResponse(tweet), nil
+}

@@ -20,6 +20,11 @@ message TweetResponse {
   google.protobuf.Timestamp updated_at = 6;
 }
 
+message TweetId {
+  string id = 1;
+}
+
 service TweetService{
   rpc CreateTweet(TweetRequest) returns (TweetResponse);
+  rpc FindTweetById(TweetId) returns (TweetResponse);
 }
