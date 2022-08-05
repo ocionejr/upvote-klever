@@ -3,6 +3,7 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/ocionejr/upvote-klever/server/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -143,7 +144,9 @@ func (r *TweetRepository) AddUpvote(ctx context.Context, tweet *models.Tweet, us
 	res, err := r.tweets.UpdateOne(
 		ctx,
 		bson.M{"_id": tweet.ID},
-		bson.M{"$addToSet": bson.M{"upvotes": userId}},
+		bson.M{"$addToSet": bson.M{"upvotes": userId},
+			"$set": bson.M{"updated_at": primitive.NewDateTimeFromTime(time.Now())},
+		},
 	)
 
 	if res.MatchedCount == 0 {
@@ -167,7 +170,9 @@ func (r *TweetRepository) RemoveUpvote(ctx context.Context, tweet *models.Tweet,
 	res, err := r.tweets.UpdateOne(
 		ctx,
 		bson.M{"_id": tweet.ID},
-		bson.M{"$pull": bson.M{"upvotes": userId}},
+		bson.M{"$pull": bson.M{"upvotes": userId},
+			"$set": bson.M{"updated_at": primitive.NewDateTimeFromTime(time.Now())},
+		},
 	)
 
 	if res.MatchedCount == 0 {
