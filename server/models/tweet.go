@@ -11,11 +11,21 @@ import (
 
 type Tweet struct {
 	ID        primitive.ObjectID `bson:"_id,omitempty" json:"_id"`
-	AuthorId  string             `bson:"author_id,omitempty" json:"author_id" validate:"nonzero"`
-	Message   string             `bson:"message" json:"message" validate:"max=280"`
+	AuthorId  string             `bson:"author_id,omitempty" json:"author_id" creating:"nonzero"`
+	Message   string             `bson:"message" json:"message" creating:"min=5,max=280" updating:"min=5,max=280"`
 	Upvotes   []string           `bson:"upvotes,omitempty" json:"upvotes"`
 	CreatedAt primitive.DateTime `bson:"created_at,omitempty" json:"created_at"`
 	UpdatedAt primitive.DateTime `bson:"updated_at" json:"updated_at"`
+}
+
+var (
+	creationValidator = validator.NewValidator()
+	updateValidator   = validator.NewValidator()
+)
+
+func init() {
+	creationValidator.SetTag("creating")
+	updateValidator.SetTag("updating")
 }
 
 func TweetRequestToTweet(tweetRequest *pb.TweetRequest) *Tweet {
@@ -45,9 +55,18 @@ func UpdateTweetRequestToTweet(req *pb.UpdateTweetRequest) *Tweet {
 	}
 }
 
-func (tweet *Tweet) Validate() error {
-	if err := validator.Validate(tweet); err != nil {
+func (tweet *Tweet) Validate(isCreating bool) error {
+	var err error
+
+	if isCreating {
+		err = creationValidator.Validate(tweet)
+	} else {
+		err = updateValidator.Validate(tweet)
+	}
+
+	if err != nil {
 		return err
 	}
+
 	return nil
 }

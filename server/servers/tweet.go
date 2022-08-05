@@ -26,7 +26,7 @@ func NewTweetServer(tweetRepository *repositories.TweetRepository) *TweetServer 
 func (s *TweetServer) CreateTweet(ctx context.Context, in *pb.TweetRequest) (*pb.TweetResponse, error) {
 	tweet := models.TweetRequestToTweet(in)
 
-	if err := tweet.Validate(); err != nil {
+	if err := tweet.Validate(true); err != nil {
 		return nil, status.Errorf(
 			codes.InvalidArgument,
 			fmt.Sprintf("Invalid tweet: %v\n", err),
@@ -83,6 +83,13 @@ func (s *TweetServer) ListTweets(in *emptypb.Empty, stream pb.TweetService_ListT
 
 func (s *TweetServer) UpdateTweet(ctx context.Context, in *pb.UpdateTweetRequest) (*emptypb.Empty, error) {
 	tweet := models.UpdateTweetRequestToTweet(in)
+
+	if err := tweet.Validate(false); err != nil {
+		return nil, status.Errorf(
+			codes.InvalidArgument,
+			fmt.Sprintf("Invalid tweet: %v\n", err),
+		)
+	}
 
 	if err := s.tweetRepository.Update(ctx, tweet, in.Id); err != nil {
 		return nil, err
