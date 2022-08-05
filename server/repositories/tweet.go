@@ -138,3 +138,51 @@ func (r *TweetRepository) DeleteTweet(ctx context.Context, id string) error {
 
 	return nil
 }
+
+func (r *TweetRepository) AddUpvote(ctx context.Context, tweet *models.Tweet, userId string) error {
+	res, err := r.tweets.UpdateOne(
+		ctx,
+		bson.M{"_id": tweet.ID},
+		bson.M{"$addToSet": bson.M{"upvotes": userId}},
+	)
+
+	if res.MatchedCount == 0 {
+		return status.Errorf(
+			codes.NotFound,
+			"Cannot found tweet with Id",
+		)
+	}
+
+	if err != nil {
+		return status.Errorf(
+			codes.Internal,
+			"Could not update",
+		)
+	}
+
+	return nil
+}
+
+func (r *TweetRepository) RemoveUpvote(ctx context.Context, tweet *models.Tweet, userId string) error {
+	res, err := r.tweets.UpdateOne(
+		ctx,
+		bson.M{"_id": tweet.ID},
+		bson.M{"$pull": bson.M{"upvotes": userId}},
+	)
+
+	if res.MatchedCount == 0 {
+		return status.Errorf(
+			codes.NotFound,
+			"Cannot found tweet with Id",
+		)
+	}
+
+	if err != nil {
+		return status.Errorf(
+			codes.Internal,
+			"Could not update",
+		)
+	}
+
+	return nil
+}

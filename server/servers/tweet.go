@@ -98,3 +98,31 @@ func (s *TweetServer) DeleteTweet(ctx context.Context, in *pb.TweetId) (*emptypb
 
 	return &emptypb.Empty{}, nil
 }
+
+func (s *TweetServer) ToggleUpvote(ctx context.Context, in *pb.ToggleUpvoteRequest) (*emptypb.Empty, error) {
+	tweet, err := s.tweetRepository.FindById(ctx, in.TweetId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	contains := false
+	for _, upvote := range tweet.Upvotes {
+		if upvote == in.UserId {
+			contains = true
+			break
+		}
+	}
+
+	if contains {
+		err = s.tweetRepository.RemoveUpvote(ctx, tweet, in.UserId)
+	} else {
+		err = s.tweetRepository.AddUpvote(ctx, tweet, in.UserId)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
+}
