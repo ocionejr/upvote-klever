@@ -52,31 +52,13 @@ func (s *TweetServer) FindTweetById(ctx context.Context, in *pb.TweetId) (*pb.Tw
 }
 
 func (s *TweetServer) ListTweets(in *emptypb.Empty, stream pb.TweetService_ListTweetsServer) error {
-	cur, err := s.tweetRepository.ListAll()
+	tweets, err := s.tweetRepository.ListAll()
 	if err != nil {
 		return err
 	}
-	defer cur.Close(context.Background())
 
-	for cur.Next(context.Background()) {
-		data := &models.Tweet{}
-		err := cur.Decode(data)
-
-		if err != nil {
-			return status.Errorf(
-				codes.Internal,
-				fmt.Sprintf("Error while decoding data from MongoDB: %v", err),
-			)
-		}
-
-		stream.Send(models.TweetToTweetResponse(data))
-	}
-
-	if err = cur.Err(); err != nil {
-		return status.Errorf(
-			codes.Internal,
-			fmt.Sprintf("Unknown internal error: %v", err),
-		)
+	for _, tweet := range tweets {
+		stream.Send(models.TweetToTweetResponse(&tweet))
 	}
 
 	return nil

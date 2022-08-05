@@ -65,8 +65,9 @@ func (r *TweetRepository) FindById(ctx context.Context, id string) (*models.Twee
 	return tweet, nil
 }
 
-func (r *TweetRepository) ListAll() (*mongo.Cursor, error) {
+func (r *TweetRepository) ListAll() ([]models.Tweet, error) {
 	cur, err := r.tweets.Find(context.Background(), primitive.D{{}})
+	tweets := []models.Tweet{}
 
 	if err != nil {
 		return nil, status.Errorf(
@@ -75,7 +76,30 @@ func (r *TweetRepository) ListAll() (*mongo.Cursor, error) {
 		)
 	}
 
-	return cur, nil
+	defer cur.Close(context.Background())
+
+	for cur.Next(context.Background()) {
+		data := &models.Tweet{}
+		err := cur.Decode(data)
+
+		if err != nil {
+			return nil, status.Errorf(
+				codes.Internal,
+				fmt.Sprintf("Error while decoding data from MongoDB: %v", err),
+			)
+		}
+
+		tweets = append(tweets, *data)
+	}
+
+	if err = cur.Err(); err != nil {
+		return nil, status.Errorf(
+			codes.Internal,
+			fmt.Sprintf("Unknown internal error: %v", err),
+		)
+	}
+
+	return tweets, nil
 }
 
 func (r *TweetRepository) Update(ctx context.Context, tweet *models.Tweet, id string) error {
