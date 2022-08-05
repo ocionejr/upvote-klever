@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	pb "github.com/ocionejr/upvote-klever/pb"
+	"github.com/ocionejr/upvote-klever/server/interfaces"
 	"github.com/ocionejr/upvote-klever/server/models"
 	"github.com/ocionejr/upvote-klever/server/repositories"
 	"google.golang.org/grpc/codes"
@@ -14,7 +15,7 @@ import (
 
 type TweetServer struct {
 	pb.UnimplementedTweetServiceServer
-	tweetRepository *repositories.TweetRepository
+	tweetRepository interfaces.TweetRepositoryInterface
 }
 
 func NewTweetServer(tweetRepository *repositories.TweetRepository) *TweetServer {
